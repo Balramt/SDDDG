@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.org/family#"
+     xml:base="http://example.org/family"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+    <owl:Ontology rdf:about="http://example.org/family"/>
+
+    <!-- 1. Class WITH rdfs:label -->
+    <owl:Class rdf:about="http://example.org/family#FemalePerson">
+        <rdfs:label xml:lang="en">woman</rdfs:label>
+    </owl:Class>
+
+    <!-- 2. Class WITHOUT rdfs:label -->
+    <owl:Class rdf:about="http://example.org/family#GrandFather"/>
+
+    <!-- 3. Property WITH rdfs:label -->
+    <owl:ObjectProperty rdf:about="http://example.org/family#hasChild">
+        <rdfs:label xml:lang="en">is parent of</rdfs:label>
+    </owl:ObjectProperty>
+
+    <!-- 4. Property WITHOUT rdfs:label -->
+    <owl:ObjectProperty rdf:about="http://example.org/family#hasSpouse"/>
+
+</rdf:RDF>
