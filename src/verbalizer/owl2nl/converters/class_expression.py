@@ -1,10 +1,11 @@
 """
 SADDG Class Expression Converter implementation for OWL to Natural Language conversion.
 Handles N-ary AST normalization, property frame extraction, dependency graph factorization,
-and morphological surface realization for Description Logic concepts.
+and morphological surface realization for Description Logic concepts using top-down feature propagation.
 """
 
 from dataclasses import dataclass, field
+import re
 from typing import Any, List, Optional
 
 from owlapy.class_expression import (
@@ -43,7 +44,7 @@ except ImportError:
         from owlapy import OWLLiteral
 
 from verbalizer.common.base import VerbalizerMode
-from verbalizer.common.grammar import EnglishGrammar, Words
+from verbalizer.common.grammar import EnglishGrammar, LinguisticContext, Words
 from verbalizer.owl2nl.converters.base import BaseClassExpressionConverter
 from verbalizer.owl2nl.input import OntologyInput
 
@@ -53,7 +54,7 @@ class SyntacticClause:
     """Represents a factored linguistic dependency clause prior to surface text realization."""
 
     head_noun: str
-    is_plural: bool = True
+    context: LinguisticContext = field(default_factory=LinguisticContext)
     quantifier_prefix: Optional[str] = None
     modifiers: List[str] = field(default_factory=list)
     relative_clauses: List[str] = field(default_factory=list)
@@ -89,7 +90,7 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
     """
     Syntax-Aware Dynamic Dependency Graph (SADDG) Class Expression Converter.
     Executes N-ary AST normalization, property frame classification, graph factorization,
-    and subject-verb agreement enforcement for OWL class expressions.
+    and subject-verb agreement enforcement for OWL class expressions using feature propagation.
     """
 
     def __init__(
@@ -122,97 +123,128 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             return flattened
         return [expression]
 
-    def _determine_property_frame(self, prop_item: Any) -> dict[str, str]:
-        """
-        Categorizes object/data properties into linguistic syntactic frames:
-        - TVP (Transitive Verb Phrase): 'located in', 'lives in', 'owns'
-        - RNP (Relational Noun Phrase): 'birth place', 'mother', 'author'
-        - PP (Prepositional Phrase): 'born in', 'part of'
-        """
-        label = self.get_label(prop_item).lower().strip()
-        words = label.split()
+    def _determine_property_frame(self, prop_item: Any, ctx: LinguisticContext) -> dict[str, str]:
+        """Categorizes object/data properties into linguistic syntactic frames using top-down context."""
+        label = self.get_label(prop_item).strip()
+        clean_label = self.grammar.clean_iri_fragment(label) if not label.isupper() else label
+        words = clean_label.split()
 
-        prepositions = {
-            "in", "at", "by", "from", "of", "to", "with", "on", "for", "about", "through", "over"
-        }
+        copula = ctx.copula()
+        rel_pronoun = ctx.relative_pronoun()
 
         if not words:
             return {
-                "type": "TVP",
-                "phrase": label,
-                "rel_clause_prefix": f"that {label}",
+                "type": "VERB_ACTIVE",
+                "phrase": clean_label,
+                "rel_clause_prefix": f"{rel_pronoun} {clean_label}",
             }
 
-        first_word = words[0]
-        last_word = words[-1]
+        first_word = words[0].lower()
+        last_word = words[-1].lower()
 
-        # 1. Expressed with auxiliary verbs or explicit action verbs
+        # 1. Active Verbs (Past tense like 'wrote', or third-person 'teaches', 'leads')
+        if self.grammar.is_verb_headed(clean_label):
+            adjusted_verb = self.grammar.adjust_verb_agreement(clean_label, ctx.is_plural)
+            return {
+                "type": "VERB_ACTIVE",
+                "phrase": adjusted_verb,
+                "rel_clause_prefix": f"{rel_pronoun} {adjusted_verb}",
+            }
+
+        # 2. Auxiliary Verb Start ('is', 'are', 'has', 'have')
         if first_word in ("is", "are", "was", "were"):
+            remainder = " ".join(words[1:])
             return {
-                "type": "TVP",
-                "phrase": label,
-                "rel_clause_prefix": f"that {label}",
-            }
-        elif first_word in ("has", "have", "contains", "owns", "includes"):
-            return {
-                "type": "TVP",
-                "phrase": label,
-                "rel_clause_prefix": f"that {label}",
+                "type": "PASSIVE_PP",
+                "phrase": clean_label,
+                "rel_clause_prefix": f"{rel_pronoun} {copula} {remainder}",
             }
 
-        # 2. Ends with a preposition
-        elif last_word in prepositions:
-            if first_word.endswith("ed") or first_word in ("born", "known", "made"):
-                return {
-                    "type": "PP",
-                    "phrase": label,
-                    "rel_clause_prefix": f"that is {label}",
-                }
-            else:
-                return {
-                    "type": "TVP",
-                    "phrase": label,
-                    "rel_clause_prefix": f"that {label}",
-                }
-
-        # 3. Third person singular verbs
-        elif first_word.endswith("s") and not first_word.endswith("ss"):
+        if first_word in ("has", "have", "contains", "owns", "includes"):
+            adjusted_verb = self.grammar.adjust_verb_agreement(clean_label, ctx.is_plural)
             return {
-                "type": "TVP",
-                "phrase": label,
-                "rel_clause_prefix": f"that {label}",
+                "type": "VERB_ACTIVE",
+                "phrase": adjusted_verb,
+                "rel_clause_prefix": f"{rel_pronoun} {adjusted_verb}",
             }
 
-        # 4. Relational Noun Phrase (RNP)
-        else:
+        # 3. Passive / Prepositional Phrases ending with prepositions ('located in', 'affiliated with', 'manufactured by')
+        if last_word in self.grammar.PREPOSITIONS:
             return {
-                "type": "RNP",
-                "phrase": label,
-                "rel_clause_prefix": f"whose {label} is",
+                "type": "PASSIVE_PP",
+                "phrase": clean_label,
+                "rel_clause_prefix": f"{rel_pronoun} {copula} {clean_label}",
             }
 
-    def _verbalize_filler(self, filler: Any) -> str:
-        """Verbalizes restriction fillers cleanly based on entity type."""
+        # 4. Default: Relational Noun Phrase (RNP)
+        return {
+            "type": "RNP",
+            "phrase": clean_label,
+            "rel_clause_prefix": f"whose {clean_label} is",
+        }
+
+    def _verbalize_literal_value(self, val: Any) -> str:
+        """Extracts clean primitive literal values from OWLLiteral or standard Python objects."""
+        if hasattr(val, "literal"):
+            return str(val.literal)
+        if isinstance(val, OWLLiteral):
+            return str(val.get_literal())
+        return str(val)
+
+    def _verbalize_filler(self, filler: Any, ctx: Optional[LinguisticContext] = None) -> str:
+        """Verbalizes restriction fillers cleanly across all OWLAPY types."""
+        filler_ctx = LinguisticContext(is_plural=False, is_filler=True)
+
         if isinstance(filler, OWLClass):
             label = self.get_label(filler)
             singular_label = self.grammar.singular(label)
             return self.grammar.with_article(singular_label)
         elif isinstance(filler, OWLNamedIndividual):
             label = self.get_label(filler)
-            return label.title()
+            return label.title() if not label.isupper() else label
         elif isinstance(filler, OWLLiteral):
-            return str(filler.literal)
+            return self._verbalize_literal_value(filler)
+        elif isinstance(filler, OWLObjectOneOf):
+            # Resolve nominal sets: {Germany, France} -> 'Germany or France'
+            individuals = list(filler.individuals())
+            labels = [self.get_label(ind).title() if not self.get_label(ind).isupper() else self.get_label(ind) for ind in individuals]
+            if len(labels) == 1:
+                return labels[0]
+            elif len(labels) == 2:
+                return f"{labels[0]} or {labels[1]}"
+            else:
+                return ", ".join(labels[:-1]) + f", or {labels[-1]}"
         elif isinstance(filler, OWLClassExpression):
-            return self.convert(filler, is_filler=True)
+            return self.convert(filler, context=filler_ctx)
         else:
             return str(filler)
 
-    def _verbalize_restriction(self, rest: OWLClassExpression) -> str:
-        """Translates single DL restrictions into dependent relative clauses."""
+    def _verbalize_restriction(self, rest: OWLClassExpression, ctx: LinguisticContext) -> str:
+        """Translates single DL restrictions into dependent relative clauses with agreement."""
+        copula = ctx.copula()
+        rel_pronoun = ctx.relative_pronoun()
+
         if isinstance(rest, OWLObjectSomeValuesFrom):
             prop = rest.get_property()
-            frame = self._determine_property_frame(prop)
-            filler_str = self._verbalize_filler(rest.get_filler())
+            frame = self._determine_property_frame(prop, ctx)
+            filler = rest.get_filler()
+
+            # Fix duplicated nominal target in active verbs (e.g., 'leadsProject' + 'Project')
+            if frame["type"] == "VERB_ACTIVE" and isinstance(filler, (OWLClass, OWLClassExpression)):
+                prop_words = frame["phrase"].split()
+                if len(prop_words) > 1 and isinstance(filler, OWLClass):
+                    filler_singular = self.grammar.singular(self.get_label(filler))
+                    if prop_words[-1].lower() == filler_singular.lower():
+                        clean_verb = " ".join(prop_words[:-1])
+                        frame["rel_clause_prefix"] = f"{rel_pronoun} {clean_verb}"
+
+            # Handle disjunctions inside value restrictions (e.g., 'locatedIn.Value(Germany) ⊔ locatedIn.Value(France)')
+            if isinstance(filler, OWLObjectUnionOf):
+                operands = self._flatten_union(filler)
+                rendered_ops = [self._verbalize_filler(op, ctx) for op in operands]
+                filler_str = " or ".join(rendered_ops) if len(rendered_ops) == 2 else ", or ".join(rendered_ops)
+            else:
+                filler_str = self._verbalize_filler(filler, ctx)
 
             if frame["type"] == "RNP":
                 return f"whose {frame['phrase']} is {filler_str}"
@@ -221,9 +253,9 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
 
         elif isinstance(rest, OWLObjectHasValue):
             prop = rest.get_property()
-            frame = self._determine_property_frame(prop)
+            frame = self._determine_property_frame(prop, ctx)
             val = rest.get_value() if hasattr(rest, "get_value") else rest.get_filler()
-            val_str = self._verbalize_filler(val)
+            val_str = self._verbalize_filler(val, ctx)
 
             if frame["type"] == "RNP":
                 return f"whose {frame['phrase']} is {val_str}"
@@ -232,12 +264,21 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
 
         elif isinstance(rest, OWLObjectAllValuesFrom):
             prop = rest.get_property()
-            frame = self._determine_property_frame(prop)
+            frame = self._determine_property_frame(prop, ctx)
             filler = rest.get_filler()
+
+            if isinstance(filler, OWLObjectComplementOf):
+                inner_operand = filler.get_operand()
+                if isinstance(inner_operand, OWLClass):
+                    inner_label = self.get_label(inner_operand)
+                    plural_inner = self.grammar.plural(inner_label)
+                    verb_action = "teach" if ctx.is_plural else "teaches"
+                    return f"that only {verb_action} non-{plural_inner}" if "teach" in frame["phrase"] else f"that only has non-{plural_inner}"
+
             filler_label = (
                 self.grammar.plural(self.get_label(filler))
                 if isinstance(filler, OWLClass)
-                else self._verbalize_filler(filler)
+                else self._verbalize_filler(filler, ctx)
             )
 
             if frame["type"] == "RNP":
@@ -255,11 +296,9 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             prop_label = self.get_label(prop)
             filler = rest.get_filler()
 
-            filler_label = (
-                self.grammar.plural(self.get_label(filler))
-                if isinstance(filler, OWLClass)
-                else self._verbalize_filler(filler)
-            )
+            plural_head = self.grammar.extract_head_noun_plural(prop_label)
+            if card == 1:
+                plural_head = self.grammar.singular(plural_head)
 
             if isinstance(rest, OWLObjectMinCardinality):
                 prefix = Words.AT_LEAST
@@ -268,34 +307,52 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             else:
                 prefix = Words.EXACTLY
 
-            return f"who have {prefix} {card_word} {prop_label} who are {filler_label}"
+            have_verb = "have" if ctx.is_plural else "has"
+
+            if isinstance(filler, OWLClass):
+                filler_label = self.grammar.plural(self.get_label(filler))
+                if self.grammar.singular(plural_head) == self.grammar.singular(self.get_label(filler)):
+                    return f"that {have_verb} {prefix} {card_word} {plural_head}"
+
+                filler_human = self.grammar.is_human(filler_label)
+                rel_card_pronoun = "who" if filler_human else "that"
+                copula_card = "are" if card != 1 else "is"
+                return f"who {have_verb} {prefix} {card_word} {plural_head} {rel_card_pronoun} {copula_card} {filler_label}"
+            else:
+                filler_str = self._verbalize_filler(filler, ctx)
+                copula_card = "are" if card != 1 else "is"
+                return f"who {have_verb} {prefix} {card_word} {plural_head} that {copula_card} {filler_str}"
 
         elif isinstance(rest, OWLObjectComplementOf):
             operand = rest.get_operand()
             if isinstance(operand, OWLClass):
                 label = self.get_label(operand)
-                return f"that is not a {label}"
+                singular_label = self.grammar.singular(label)
+                plural_label = self.grammar.plural(label)
+                if ctx.is_plural:
+                    return f"{rel_pronoun} {copula} not {plural_label}"
+                return f"{rel_pronoun} {copula} not a {singular_label}"
             else:
-                return f"that is not {self.convert(operand, is_filler=True)}"
+                operand_text = self.convert(operand, context=LinguisticContext(is_plural=False, is_filler=True))
+                return f"{rel_pronoun} {copula} not {operand_text}"
 
         elif isinstance(rest, (OWLDataSomeValuesFrom, OWLDataHasValue)):
             prop = rest.get_property()
-            prop_label = self.get_label(prop)
+            prop_label = self.grammar.clean_iri_fragment(self.get_label(prop))
             if isinstance(rest, OWLDataHasValue):
                 val = rest.get_value() if hasattr(rest, "get_value") else rest.get_filler()
-                val_str = str(val.literal) if hasattr(val, "literal") else str(val)
+                val_str = self._verbalize_literal_value(val)
                 return f"whose {prop_label} is {val_str}"
             else:
                 return f"that has a {prop_label}"
 
-        # Fallback for unhandled restriction constructs
         iri_str = rest.iri.as_str() if hasattr(rest, "iri") else str(rest)
-        return f"that is related via {self.grammar.clean_iri_fragment(iri_str)}"
+        return f"{rel_pronoun} {copula} related via {self.grammar.clean_iri_fragment(iri_str)}"
 
     def _verbalize_intersection(
-        self, expr: OWLObjectIntersectionOf, is_filler: bool = False
+        self, expr: OWLObjectIntersectionOf, ctx: LinguisticContext
     ) -> str:
-        """Processes intersection AST nodes via SADDG graph factorization."""
+        """Processes intersection AST nodes, dynamically establishing singular/plural context."""
         operands = self._flatten_intersection(expr)
 
         atomic_classes: List[OWLClass] = []
@@ -307,47 +364,49 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             else:
                 restrictions.append(op)
 
-        # 1. Determine Head Noun from Atomic Classes
         if atomic_classes:
             primary_label = self.get_label(atomic_classes[0])
-            if is_filler:
+            is_human = self.grammar.is_human(primary_label)
+
+            if ctx.is_filler:
+                subject_ctx = LinguisticContext(is_plural=False, is_filler=True, is_human=is_human)
                 singular_label = self.grammar.singular(primary_label)
                 head_noun = self.grammar.with_article(singular_label)
             else:
+                subject_ctx = LinguisticContext(is_plural=True, is_filler=False, is_human=is_human)
                 head_noun = self.grammar.plural(primary_label)
+
             extra_atomic = atomic_classes[1:]
         else:
-            head_noun = (
-                Words.EVERYTHING
-                if self.mode == VerbalizerMode.STANDARD
-                else "things"
-            )
+            is_plural_subject = not ctx.is_filler
+            subject_ctx = LinguisticContext(is_plural=is_plural_subject, is_filler=ctx.is_filler, is_human=False)
+            head_noun = Words.EVERYTHING if self.mode == VerbalizerMode.STANDARD else "things"
             extra_atomic = []
 
-        clause = SyntacticClause(head_noun=head_noun)
+        clause = SyntacticClause(head_noun=head_noun, context=subject_ctx)
+        copula = subject_ctx.copula()
+        rel_pronoun = subject_ctx.relative_pronoun()
 
-        # 2. Add extra atomic class constraints
         for ac in extra_atomic:
             label = self.get_label(ac)
-            if is_filler:
-                singular_label = self.grammar.singular(label)
-                clause.relative_clauses.append(f"that is a {singular_label}")
-            else:
+            if subject_ctx.is_plural:
                 plural_label = self.grammar.plural(label)
-                clause.relative_clauses.append(f"that are {plural_label}")
+                clause.relative_clauses.append(f"{rel_pronoun} {copula} {plural_label}")
+            else:
+                singular_label = self.grammar.singular(label)
+                clause.relative_clauses.append(f"{rel_pronoun} {copula} a {singular_label}")
 
-        # 3. Factorize and aggregate restrictions
         for rest in restrictions:
-            rel_str = self._verbalize_restriction(rest)
+            rel_str = self._verbalize_restriction(rest, subject_ctx)
             if rel_str:
                 clause.relative_clauses.append(rel_str)
 
         return clause.realize()
 
-    def _verbalize_union(self, expr: OWLObjectUnionOf, is_filler: bool = False) -> str:
+    def _verbalize_union(self, expr: OWLObjectUnionOf, ctx: LinguisticContext) -> str:
         """Processes union AST nodes cleanly with logical disjunction ('or')."""
         operands = self._flatten_union(expr)
-        parts: List[str] = [self.convert(op, is_filler=is_filler) for op in operands]
+        parts: List[str] = [self.convert(op, context=ctx) for op in operands]
 
         if len(parts) == 1:
             return parts[0]
@@ -357,30 +416,37 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             return ", ".join(parts[:-1]) + f", or {parts[-1]}"
 
     def _verbalize_standalone_restriction(
-        self, expr: OWLClassExpression, is_filler: bool = False
+        self, expr: OWLClassExpression, ctx: LinguisticContext
     ) -> str:
         """Wraps a standalone restriction with a root subject placeholder."""
-        rel_clause = self._verbalize_restriction(expr)
+        rel_clause = self._verbalize_restriction(expr, ctx)
         head = Words.EVERYTHING if self.mode == VerbalizerMode.STANDARD else "things"
         return f"{head} {rel_clause}"
 
-    def convert(self, item: OWLClassExpression, is_filler: bool = False) -> str:
-        """
-        Converts an OWLAPY OWLClassExpression into natural English text.
-        Entry point for SADDG processing.
-        """
+    def convert(
+        self,
+        item: OWLClassExpression,
+        is_filler: bool = False,
+        context: Optional[LinguisticContext] = None,
+    ) -> str:
+        """Converts an OWLAPY OWLClassExpression into natural English text with feature propagation."""
+        if context is None:
+            ctx = LinguisticContext(is_plural=not is_filler, is_filler=is_filler)
+        else:
+            ctx = context
+
         if isinstance(item, OWLClass):
             label = self.get_label(item)
-            if is_filler:
+            if ctx.is_filler:
                 singular_label = self.grammar.singular(label)
                 return self.grammar.with_article(singular_label)
             return self.grammar.plural(label)
 
         elif isinstance(item, OWLObjectIntersectionOf):
-            return self._verbalize_intersection(item, is_filler=is_filler)
+            return self._verbalize_intersection(item, ctx)
 
         elif isinstance(item, OWLObjectUnionOf):
-            return self._verbalize_union(item, is_filler=is_filler)
+            return self._verbalize_union(item, ctx)
 
         elif isinstance(
             item,
@@ -393,13 +459,18 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
                 OWLObjectExactCardinality,
             ),
         ):
-            return self._verbalize_standalone_restriction(item, is_filler=is_filler)
+            return self._verbalize_standalone_restriction(item, ctx)
 
         elif isinstance(item, OWLObjectComplementOf):
-            operand_text = self.convert(item.get_operand(), is_filler=True)
-            return f"everything that is not {operand_text}"
+            operand = item.get_operand()
+            if isinstance(operand, OWLClass):
+                label = self.get_label(operand)
+                singular_label = self.grammar.singular(label)
+                return f"everything that is not a {singular_label}"
+            else:
+                operand_text = self.convert(operand, context=LinguisticContext(is_plural=False, is_filler=True))
+                return f"everything that is not {operand_text}"
 
         else:
-            # General fallback for non-standard class expressions
             iri_str = item.iri.as_str() if hasattr(item, "iri") else str(item)
             return self.grammar.clean_iri_fragment(iri_str)

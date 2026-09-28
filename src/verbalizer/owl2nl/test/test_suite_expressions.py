@@ -1,225 +1,10 @@
-# """
-# Benchmark Test Suite for OWL Class Expression Verbalization.
-# Contains 8 distinct OWL queries across Simple, Complex, and Very Complex categories.
-# """
-
-# import sys
-# from pathlib import Path
-
-# # Resolve project 'src' directory relative to this test file location
-# SRC_DIR = Path(__file__).resolve().parents[3]
-# if str(SRC_DIR) not in sys.path:
-#     sys.path.insert(0, str(SRC_DIR))
-
-# from owlapy.class_expression import (
-#     OWLClass,
-#     OWLObjectAllValuesFrom,
-#     OWLObjectComplementOf,
-#     OWLObjectExactCardinality,
-#     OWLObjectHasValue,
-#     OWLObjectIntersectionOf,
-#     OWLObjectMinCardinality,
-#     OWLObjectSomeValuesFrom,
-#     OWLObjectUnionOf,
-# )
-# from owlapy.iri import IRI
-# from owlapy.owl_property import OWLObjectProperty
-
-# # Robust OWLAPY Import for Individuals
-# try:
-#     from owlapy.owl_individual import OWLNamedIndividual
-# except ImportError:
-#     try:
-#         from owlapy.model import OWLNamedIndividual
-#     except ImportError:
-#         from owlapy import OWLNamedIndividual
-
-# from verbalizer.owl2nl.converters.class_expression import ClassExpressionConverter
-
-
-# def run_benchmark_suite():
-#     converter = ClassExpressionConverter()
-
-#     # Common Entities
-#     student = OWLClass(IRI.create("http://example.org/ontology#Student"))
-#     course = OWLClass(IRI.create("http://example.org/ontology#Course"))
-#     doctor = OWLClass(IRI.create("http://example.org/ontology#Doctor"))
-#     professor = OWLClass(IRI.create("http://example.org/ontology#Professor"))
-#     teacher = OWLClass(IRI.create("http://example.org/ontology#Teacher"))
-#     grad_course = OWLClass(IRI.create("http://example.org/ontology#GraduateCourse"))
-#     company = OWLClass(IRI.create("http://example.org/ontology#Company"))
-#     engineer = OWLClass(IRI.create("http://example.org/ontology#Engineer"))
-#     author = OWLClass(IRI.create("http://example.org/ontology#Author"))
-#     book = OWLClass(IRI.create("http://example.org/ontology#Book"))
-#     article = OWLClass(IRI.create("http://example.org/ontology#Article"))
-#     researcher = OWLClass(IRI.create("http://example.org/ontology#Researcher"))
-#     university = OWLClass(IRI.create("http://example.org/ontology#University"))
-#     project = OWLClass(IRI.create("http://example.org/ontology#Project"))
-#     journal_art = OWLClass(IRI.create("http://example.org/ontology#JournalArticle"))
-#     manager = OWLClass(IRI.create("http://example.org/ontology#Manager"))
-#     department = OWLClass(IRI.create("http://example.org/ontology#Department"))
-#     organization = OWLClass(IRI.create("http://example.org/ontology#Organization"))
-#     budget = OWLClass(IRI.create("http://example.org/ontology#Budget"))
-#     vehicle = OWLClass(IRI.create("http://example.org/ontology#Vehicle"))
-#     electric_vehicle = OWLClass(IRI.create("http://example.org/ontology#ElectricVehicle"))
-#     wheel = OWLClass(IRI.create("http://example.org/ontology#Wheel"))
-
-#     # Object Properties
-#     enrolled_in = OWLObjectProperty(IRI.create("http://example.org/ontology#enrolledIn"))
-#     teaches = OWLObjectProperty(IRI.create("http://example.org/ontology#teaches"))
-#     has_employee = OWLObjectProperty(IRI.create("http://example.org/ontology#hasEmployee"))
-#     headquartered_in = OWLObjectProperty(IRI.create("http://example.org/ontology#headquarteredIn"))
-#     wrote = OWLObjectProperty(IRI.create("http://example.org/ontology#wrote"))
-#     affiliated_with = OWLObjectProperty(IRI.create("http://example.org/ontology#affiliatedWith"))
-#     located_in = OWLObjectProperty(IRI.create("http://example.org/ontology#locatedIn"))
-#     leads_project = OWLObjectProperty(IRI.create("http://example.org/ontology#leadsProject"))
-#     funded_by = OWLObjectProperty(IRI.create("http://example.org/ontology#fundedBy"))
-#     published_paper = OWLObjectProperty(IRI.create("http://example.org/ontology#publishedPaper"))
-#     manages = OWLObjectProperty(IRI.create("http://example.org/ontology#manages"))
-#     belongs_to = OWLObjectProperty(IRI.create("http://example.org/ontology#belongsTo"))
-#     approves = OWLObjectProperty(IRI.create("http://example.org/ontology#approves"))
-#     has_wheel = OWLObjectProperty(IRI.create("http://example.org/ontology#hasWheel"))
-#     manufactured_by = OWLObjectProperty(IRI.create("http://example.org/ontology#manufacturedBy"))
-
-#     # Individuals
-#     germany = OWLNamedIndividual(IRI.create("http://example.org/ontology#Germany"))
-#     japan = OWLNamedIndividual(IRI.create("http://example.org/ontology#Japan"))
-#     nsf = OWLNamedIndividual(IRI.create("http://example.org/ontology#NSF"))
-#     usa = OWLNamedIndividual(IRI.create("http://example.org/ontology#USA"))
-#     france = OWLNamedIndividual(IRI.create("http://example.org/ontology#France"))
-
-#     # Define the 8 Benchmark Expressions
-#     test_cases = [
-#         # --- SIMPLE / EASY (2 Cases) ---
-#         {
-#             "id": 1,
-#             "category": "EASY",
-#             "description": "Atomic Class Conjunction with Existential Restriction",
-#             "dl": "Student ⊓ ∃enrolledIn.Course",
-#             "manchester": "Student AND enrolledIn SOME Course",
-#             "expr": OWLObjectIntersectionOf([student, OWLObjectSomeValuesFrom(enrolled_in, course)]),
-#         },
-#         {
-#             "id": 2,
-#             "category": "EASY",
-#             "description": "Disjunction (Union) of Atomic Classes",
-#             "dl": "Doctor ⊔ Professor",
-#             "manchester": "Doctor OR Professor",
-#             "expr": OWLObjectUnionOf([doctor, professor]),
-#         },
-
-#         # --- COMPLEX (3 Cases) ---
-#         {
-#             "id": 3,
-#             "category": "COMPLEX",
-#             "description": "Universal Quantifier with Negated Class Filler",
-#             "dl": "Teacher ⊓ ∀teaches.(¬GraduateCourse)",
-#             "manchester": "Teacher AND teaches ONLY (NOT GraduateCourse)",
-#             "expr": OWLObjectIntersectionOf([
-#                 teacher,
-#                 OWLObjectAllValuesFrom(teaches, OWLObjectComplementOf(grad_course))
-#             ]),
-#         },
-#         {
-#             "id": 4,
-#             "category": "COMPLEX",
-#             "description": "Minimum Cardinality with Value Restriction",
-#             "dl": "Company ⊓ (≥ 5 hasEmployee.Engineer) ⊓ headquarteredIn.Value(Germany)",
-#             "manchester": "Company AND hasEmployee MIN 5 Engineer AND headquarteredIn VALUE Germany",
-#             "expr": OWLObjectIntersectionOf([
-#                 company,
-#                 OWLObjectMinCardinality(5, has_employee, engineer),
-#                 OWLObjectHasValue(headquartered_in, germany)
-#             ]),
-#         },
-#         {
-#             "id": 5,
-#             "category": "COMPLEX",
-#             "description": "Existential Restriction with Union Filler",
-#             "dl": "Author ⊓ ∃wrote.(Book ⊔ Article)",
-#             "manchester": "Author AND wrote SOME (Book OR Article)",
-#             "expr": OWLObjectIntersectionOf([
-#                 author,
-#                 OWLObjectSomeValuesFrom(wrote, OWLObjectUnionOf([book, article]))
-#             ]),
-#         },
-
-#         # --- VERY COMPLEX (3 Cases) ---
-#         {
-#             "id": 6,
-#             "category": "VERY COMPLEX",
-#             "description": "Multi-Restriction Intersection with Nested Fillers & Cardinality",
-#             "dl": "Researcher ⊓ ∃affiliatedWith.(University ⊓ locatedIn.Value(Japan)) ⊓ ∃leadsProject.(Project ⊓ fundedBy.Value(NSF)) ⊓ (≥ 3 publishedPaper.JournalArticle)",
-#             "manchester": "Researcher AND affiliatedWith SOME (University AND locatedIn VALUE Japan) AND leadsProject SOME (Project AND fundedBy VALUE NSF) AND publishedPaper MIN 3 JournalArticle",
-#             "expr": OWLObjectIntersectionOf([
-#                 researcher,
-#                 OWLObjectSomeValuesFrom(affiliated_with, OWLObjectIntersectionOf([university, OWLObjectHasValue(located_in, japan)])),
-#                 OWLObjectSomeValuesFrom(leads_project, OWLObjectIntersectionOf([project, OWLObjectHasValue(funded_by, nsf)])),
-#                 OWLObjectMinCardinality(3, published_paper, journal_art)
-#             ]),
-#         },
-#         {
-#             "id": 7,
-#             "category": "VERY COMPLEX",
-#             "description": "Deeply Nested Existential Quantifiers with Universal Constraint",
-#             "dl": "Manager ⊓ ∃manages.(Department ⊓ ∃belongsTo.(Organization ⊓ locatedIn.Value(USA))) ⊓ ∀approves.Budget",
-#             "manchester": "Manager AND manages SOME (Department AND belongsTo SOME (Organization AND locatedIn VALUE USA)) AND approves ONLY Budget",
-#             "expr": OWLObjectIntersectionOf([
-#                 manager,
-#                 OWLObjectSomeValuesFrom(manages, OWLObjectIntersectionOf([
-#                     department,
-#                     OWLObjectSomeValuesFrom(belongs_to, OWLObjectIntersectionOf([organization, OWLObjectHasValue(located_in, usa)]))
-#                 ])),
-#                 OWLObjectAllValuesFrom(approves, budget)
-#             ]),
-#         },
-#         {
-#             "id": 8,
-#             "category": "VERY COMPLEX",
-#             "description": "Negation, Exact Cardinality, and Disjunction within Nested Filler",
-#             "dl": "Vehicle ⊓ ¬ElectricVehicle ⊓ (= 4 hasWheel.Wheel) ⊓ ∃manufacturedBy.(Company ⊓ (locatedIn.Value(Germany) ⊔ locatedIn.Value(France)))",
-#             "manchester": "Vehicle AND NOT ElectricVehicle AND hasWheel EXACT 4 Wheel AND manufacturedBy SOME (Company AND (locatedIn VALUE Germany OR locatedIn VALUE France))",
-#             "expr": OWLObjectIntersectionOf([
-#                 vehicle,
-#                 OWLObjectComplementOf(electric_vehicle),
-#                 OWLObjectExactCardinality(4, has_wheel, wheel),
-#                 OWLObjectSomeValuesFrom(manufactured_by, OWLObjectIntersectionOf([
-#                     company,
-#                     OWLObjectUnionOf([
-#                         OWLObjectHasValue(located_in, germany),
-#                         OWLObjectHasValue(located_in, france)
-#                     ])
-#                 ]))
-#             ]),
-#         },
-#     ]
-
-#     # Run and Print Output
-#     print("=" * 80)
-#     print("      OWL CLASS EXPRESSION VERBALIZATION BENCHMARK SUITE")
-#     print("=" * 80)
-
-#     for case in test_cases:
-#         nl_output = converter.convert(case["expr"])
-
-#         print(f"\n[Test Query #{case['id']}] Category: {case['category']}")
-#         print(f"Description : {case['description']}")
-#         print(f"DL Query    : {case['dl']}")
-#         print(f"Manchester  : {case['manchester']}")
-#         print("-" * 80)
-#         print(f"Generated NL Output: {nl_output}")
-#         print("=" * 80)
-
-
-# if __name__ == "__main__":
-#     run_benchmark_suite()
-
-
-
-
 """
-Benchmark Test Suite for OWL Class Expression Verbalization.
-Clean console output using Unicode Description Logic symbols.
+Expanded Benchmark Test Suite for OWL Class Expression Verbalization.
+Contains original benchmarks + stress-test queries to expose edge cases in:
+- Contextual filler agreement (singular vs. plural subject propagation)
+- Deeply nested unions, intersections, and complements
+- Cardinality folding and exact/min/max bounds
+- Data properties, nominals (OWLObjectOneOf), and inverse property patterns
 """
 
 import sys
@@ -231,17 +16,22 @@ if str(SRC_DIR) not in sys.path:
 
 from owlapy.class_expression import (
     OWLClass,
+    OWLDataHasValue,
+    OWLDataSomeValuesFrom,
     OWLObjectAllValuesFrom,
     OWLObjectComplementOf,
     OWLObjectExactCardinality,
     OWLObjectHasValue,
     OWLObjectIntersectionOf,
+    OWLObjectMaxCardinality,
     OWLObjectMinCardinality,
+    OWLObjectOneOf,
     OWLObjectSomeValuesFrom,
     OWLObjectUnionOf,
 )
 from owlapy.iri import IRI
-from owlapy.owl_property import OWLObjectProperty
+from owlapy.owl_datatype import OWLDatatype
+from owlapy.owl_property import OWLDataProperty, OWLObjectProperty
 
 try:
     from owlapy.owl_individual import OWLNamedIndividual
@@ -251,13 +41,21 @@ except ImportError:
     except ImportError:
         from owlapy import OWLNamedIndividual
 
+try:
+    from owlapy.owl_literal import OWLLiteral
+except ImportError:
+    try:
+        from owlapy.model import OWLLiteral
+    except ImportError:
+        from owlapy import OWLLiteral
+
 from verbalizer.owl2nl.converters.class_expression import ClassExpressionConverter
 
 
 def run_benchmark_suite():
     converter = ClassExpressionConverter()
 
-    # Entities
+    # --- Classes ---
     person = OWLClass(IRI.create("http://example.org/ontology#Person"))
     student = OWLClass(IRI.create("http://example.org/ontology#Student"))
     course = OWLClass(IRI.create("http://example.org/ontology#Course"))
@@ -278,8 +76,11 @@ def run_benchmark_suite():
     vehicle = OWLClass(IRI.create("http://example.org/ontology#Vehicle"))
     electric_vehicle = OWLClass(IRI.create("http://example.org/ontology#ElectricVehicle"))
     wheel = OWLClass(IRI.create("http://example.org/ontology#Wheel"))
+    country = OWLClass(IRI.create("http://example.org/ontology#Country"))
+    award = OWLClass(IRI.create("http://example.org/ontology#Award"))
+    paper = OWLClass(IRI.create("http://example.org/ontology#Paper"))
 
-    # Object Properties
+    # --- Object Properties ---
     enrolled_in = OWLObjectProperty(IRI.create("http://example.org/ontology#enrolledIn"))
     teaches = OWLObjectProperty(IRI.create("http://example.org/ontology#teaches"))
     has_employee = OWLObjectProperty(IRI.create("http://example.org/ontology#hasEmployee"))
@@ -294,53 +95,156 @@ def run_benchmark_suite():
     published_paper = OWLObjectProperty(IRI.create("http://example.org/ontology#publishedPaper"))
     has_wheel = OWLObjectProperty(IRI.create("http://example.org/ontology#hasWheel"))
     manufactured_by = OWLObjectProperty(IRI.create("http://example.org/ontology#manufacturedBy"))
+    won_award = OWLObjectProperty(IRI.create("http://example.org/ontology#wonAward"))
+    has_citizenship = OWLObjectProperty(IRI.create("http://example.org/ontology#hasCitizenship"))
 
-    # Individuals
+    # --- Data Properties ---
+    has_age = OWLDataProperty(IRI.create("http://example.org/ontology#hasAge"))
+    has_name = OWLDataProperty(IRI.create("http://example.org/ontology#hasName"))
+
+    # --- Datatypes, Individuals & Literals ---
+    string_datatype = OWLDatatype(IRI.create("http://www.w3.org/2001/XMLSchema#string"))
     germany = OWLNamedIndividual(IRI.create("http://example.org/ontology#Germany"))
     france = OWLNamedIndividual(IRI.create("http://example.org/ontology#France"))
     japan = OWLNamedIndividual(IRI.create("http://example.org/ontology#Japan"))
     nsf = OWLNamedIndividual(IRI.create("http://example.org/ontology#NSF"))
+    nobel = OWLNamedIndividual(IRI.create("http://example.org/ontology#NobelPrize"))
+    age_30 = OWLLiteral(30)
 
-    # 8 Benchmark Expressions with Unicode Symbols
+    # List of Test Cases: (Description / Label, Expression)
     test_cases = [
+        # ==========================================
+        # SECTION 1: Standard Benchmark Suite (1–8)
+        # ==========================================
         (
-            "Student ⊓ ∃enrolledIn.Course",
+            "1. Student ⊓ ∃enrolledIn.Course",
             OWLObjectIntersectionOf([student, OWLObjectSomeValuesFrom(enrolled_in, course)])
         ),
         (
-            "Doctor ⊔ Professor",
+            "2. Doctor ⊔ Professor",
             OWLObjectUnionOf([doctor, professor])
         ),
         (
-            "Teacher ⊓ ∀teaches.(¬GraduateCourse)",
+            "3. Teacher ⊓ ∀teaches.(¬GraduateCourse)",
             OWLObjectIntersectionOf([teacher, OWLObjectAllValuesFrom(teaches, OWLObjectComplementOf(grad_course))])
         ),
         (
-            "Company ⊓ (≥ 5 hasEmployee.Engineer) ⊓ headquarteredIn.Value(Germany)",
+            "4. Company ⊓ (≥ 5 hasEmployee.Engineer) ⊓ headquarteredIn.Value(Germany)",
             OWLObjectIntersectionOf([company, OWLObjectMinCardinality(5, has_employee, engineer), OWLObjectHasValue(headquartered_in, germany)])
         ),
         (
-            "Author ⊓ ∃wrote.(Book ⊔ Article)",
+            "5. Author ⊓ ∃wrote.(Book ⊔ Article)",
             OWLObjectIntersectionOf([author, OWLObjectSomeValuesFrom(wrote, OWLObjectUnionOf([book, article]))])
         ),
         (
-            "Person ⊓ ∃birthPlace.(City ⊓ locatedIn.Value(France)) ⊓ (≥ 2 hasChild.Doctor)",
+            "6. Person ⊓ ∃birthPlace.(City ⊓ locatedIn.Value(France)) ⊓ (≥ 2 hasChild.Doctor)",
             OWLObjectIntersectionOf([person, OWLObjectSomeValuesFrom(birth_place, OWLObjectIntersectionOf([city, OWLObjectHasValue(located_in, france)])), OWLObjectMinCardinality(2, has_child, doctor)])
         ),
         (
-            "Researcher ⊓ ∃affiliatedWith.(University ⊓ locatedIn.Value(Japan)) ⊓ ∃leadsProject.(Project ⊓ fundedBy.Value(NSF)) ⊓ (≥ 3 publishedPaper.JournalArticle)",
+            "7. Researcher ⊓ ∃affiliatedWith.(University ⊓ locatedIn.Value(Japan)) ⊓ ∃leadsProject.(Project ⊓ fundedBy.Value(NSF)) ⊓ (≥ 3 publishedPaper.JournalArticle)",
             OWLObjectIntersectionOf([researcher, OWLObjectSomeValuesFrom(affiliated_with, OWLObjectIntersectionOf([university, OWLObjectHasValue(located_in, japan)])), OWLObjectSomeValuesFrom(leads_project, OWLObjectIntersectionOf([project, OWLObjectHasValue(funded_by, nsf)])), OWLObjectMinCardinality(3, published_paper, journal_art)])
         ),
-        # (
-        #     "Vehicle ⊓ ¬ElectricVehicle ⊓ (= 4 hasWheel.Wheel) ⊓ ∃manufacturedBy.(Company ⊓ (locatedIn.Value(Germany) ⊔ locatedIn.Value(France)))",
-        #     OWLObjectIntersectionOf([vehicle, OWLObjectComplementOf(electric_vehicle), OWLObjectExactCardinality(4, has_wheel, wheel), OWLObjectSomeValuesFrom(manufactured_by, OWLObjectIntersectionOf([company, OWLObjectUnionOf([OWLObjectHasValue(located_in, germany), OWLObjectHasValue(located_in, france)])]))])
-        # ),
+        (
+            "8. Vehicle ⊓ ¬ElectricVehicle ⊓ (= 4 hasWheel.Wheel) ⊓ ∃manufacturedBy.(Company ⊓ (locatedIn.Value(Germany) ⊔ locatedIn.Value(France)))",
+            OWLObjectIntersectionOf([
+                vehicle,
+                OWLObjectComplementOf(electric_vehicle),
+                OWLObjectExactCardinality(4, has_wheel, wheel),
+                OWLObjectSomeValuesFrom(
+                    manufactured_by,
+                    OWLObjectIntersectionOf([
+                        company,
+                        OWLObjectUnionOf([
+                            OWLObjectHasValue(located_in, germany),
+                            OWLObjectHasValue(located_in, france)
+                        ])
+                    ])
+                )
+            ])
+        ),
+
+        # ==========================================
+        # SECTION 2: Edge Cases & Stress-Test Queries (9–18)
+        # ==========================================
+        (
+            "9. [Max Cardinality] Person ⊓ (≤ 1 hasChild.Person)",
+            OWLObjectIntersectionOf([person, OWLObjectMaxCardinality(1, has_child, person)])
+        ),
+        (
+            "10. [Nested Filler Plurality Check] Professor ⊓ ∃teaches.(Course ⊓ ∃enrolledIn.Student)",
+            OWLObjectIntersectionOf([
+                professor,
+                OWLObjectSomeValuesFrom(
+                    teaches,
+                    OWLObjectIntersectionOf([course, OWLObjectSomeValuesFrom(enrolled_in, student)])
+                )
+            ])
+        ),
+        (
+            "11. [Data Property HasValue & SomeValues] Person ⊓ hasAge.Value(30) ⊓ ∃hasName.String",
+            OWLObjectIntersectionOf([
+                person,
+                OWLDataHasValue(has_age, age_30),
+                OWLDataSomeValuesFrom(has_name, string_datatype)
+            ])
+        ),
+        (
+            "12. [Nominals / OWLObjectOneOf] Person ⊓ ∃hasCitizenship.{Germany, France}",
+            OWLObjectIntersectionOf([
+                person,
+                OWLObjectSomeValuesFrom(has_citizenship, OWLObjectOneOf([germany, france]))
+            ])
+        ),
+        (
+            "13. [Deep Negation & Union] Person ⊓ ¬(Doctor ⊔ Professor)",
+            OWLObjectIntersectionOf([
+                person,
+                OWLObjectComplementOf(OWLObjectUnionOf([doctor, professor]))
+            ])
+        ),
+        (
+            "14. [Disjunction of Restrictions] ∃wrote.Book ⊔ ∃wrote.Article",
+            OWLObjectUnionOf([
+                OWLObjectSomeValuesFrom(wrote, book),
+                OWLObjectSomeValuesFrom(wrote, article)
+            ])
+        ),
+        (
+            "15. [Triple Cardinality Mix] Company ⊓ (≥ 10 hasEmployee.Engineer) ⊓ (≤ 20 hasEmployee.Person) ⊓ (= 1 headquarteredIn.Country)",
+            OWLObjectIntersectionOf([
+                company,
+                OWLObjectMinCardinality(10, has_employee, engineer),
+                OWLObjectMaxCardinality(20, has_employee, person),
+                OWLObjectExactCardinality(1, headquartered_in, country)
+            ])
+        ),
+        (
+            "16. [Complex Nesting with Awards] Researcher ⊓ ∃wonAward.Value(NobelPrize) ⊓ ∀publishedPaper.(JournalArticle ⊔ Book)",
+            OWLObjectIntersectionOf([
+                researcher,
+                OWLObjectHasValue(won_award, nobel),
+                OWLObjectAllValuesFrom(published_paper, OWLObjectUnionOf([journal_art, book]))
+            ])
+        ),
+        (
+            "17. [Anonymous Root Restriction] ∃enrolledIn.GraduateCourse",
+            OWLObjectSomeValuesFrom(enrolled_in, grad_course)
+        ),
+        (
+            "18. [Multiple Atomic Classes - Conjunction] Student ⊓ Employee ⊓ Person",
+            OWLObjectIntersectionOf([student, OWLClass(IRI.create("http://example.org/ontology#Employee")), person])
+        ),
     ]
 
-    for dl_str, expr in test_cases:
+    print("================================================================================")
+    print("                     SADDG VERBALIZER BENCHMARK TEST SUITE                      ")
+    print("================================================================================\n")
+
+    for label, expr in test_cases:
         nl_output = converter.convert(expr)
-        print(f"input:  {dl_str}")
-        print(f"output: {nl_output}\n")
+        print(f"[{label}]")
+        #print(f"  DL Expression: {expr}")
+        print(f"  Verbalized NL: {nl_output}\n" + "-" * 80)
 
 
 if __name__ == "__main__":
