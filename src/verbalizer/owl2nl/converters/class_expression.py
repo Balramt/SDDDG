@@ -90,7 +90,7 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
     """
     Syntax-Aware Dynamic Dependency Graph (SADDG) Class Expression Converter.
     Executes N-ary AST normalization, property frame classification, graph factorization,
-    and subject-verb agreement enforcement for OWL class expressions using feature propagation.
+    and subject-verb agreement enforcement using feature propagation.
     """
 
     def __init__(
@@ -142,7 +142,7 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
         first_word = words[0].lower()
         last_word = words[-1].lower()
 
-        # 1. Active Verbs (Past tense like 'wrote', or third-person 'teaches', 'leads')
+        # 1. Active Verbs
         if self.grammar.is_verb_headed(clean_label):
             adjusted_verb = self.grammar.adjust_verb_agreement(clean_label, ctx.is_plural)
             return {
@@ -151,7 +151,7 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
                 "rel_clause_prefix": f"{rel_pronoun} {adjusted_verb}",
             }
 
-        # 2. Auxiliary Verb Start ('is', 'are', 'has', 'have')
+        # 2. Auxiliary Verb Start ('is', 'are', 'was', 'were')
         if first_word in ("is", "are", "was", "were"):
             remainder = " ".join(words[1:])
             return {
@@ -199,13 +199,15 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
             label = self.get_label(filler)
             singular_label = self.grammar.singular(label)
             return self.grammar.with_article(singular_label)
+
         elif isinstance(filler, OWLNamedIndividual):
             label = self.get_label(filler)
             return label.title() if not label.isupper() else label
+
         elif isinstance(filler, OWLLiteral):
             return self._verbalize_literal_value(filler)
+
         elif isinstance(filler, OWLObjectOneOf):
-            # Resolve nominal sets: {Germany, France} -> 'Germany or France'
             individuals = list(filler.individuals())
             labels = [self.get_label(ind).title() if not self.get_label(ind).isupper() else self.get_label(ind) for ind in individuals]
             if len(labels) == 1:
@@ -214,8 +216,20 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
                 return f"{labels[0]} or {labels[1]}"
             else:
                 return ", ".join(labels[:-1]) + f", or {labels[-1]}"
+
+        elif isinstance(filler, OWLObjectUnionOf):
+            operands = self._flatten_union(filler)
+            rendered_ops = [self._verbalize_filler(op, ctx) for op in operands]
+            if len(rendered_ops) == 1:
+                return rendered_ops[0]
+            elif len(rendered_ops) == 2:
+                return f"{rendered_ops[0]} or {rendered_ops[1]}"
+            else:
+                return ", ".join(rendered_ops[:-1]) + f", or {rendered_ops[-1]}"
+
         elif isinstance(filler, OWLClassExpression):
             return self.convert(filler, context=filler_ctx)
+
         else:
             return str(filler)
 
@@ -238,13 +252,17 @@ class ClassExpressionConverter(BaseClassExpressionConverter):
                         clean_verb = " ".join(prop_words[:-1])
                         frame["rel_clause_prefix"] = f"{rel_pronoun} {clean_verb}"
 
-            # Handle disjunctions inside value restrictions (e.g., 'locatedIn.Value(Germany) ⊔ locatedIn.Value(France)')
+            # If filler is an ObjectUnionOf of HasValue restrictions: (locatedIn.Value(Germany) ⊔ locatedIn.Value(France))
             if isinstance(filler, OWLObjectUnionOf):
-                operands = self._flatten_union(filler)
-                rendered_ops = [self._verbalize_filler(op, ctx) for op in operands]
-                filler_str = " or ".join(rendered_ops) if len(rendered_ops) == 2 else ", or ".join(rendered_ops)
-            else:
-                filler_str = self._verbalize_filler(filler, ctx)
+                union_ops = self._flatten_union(filler)
+                if all(isinstance(op, OWLObjectHasValue) for op in union_ops):
+                    vals = [self._verbalize_filler(op.get_value(), ctx) for op in union_ops]
+                    val_str = " or ".join(vals) if len(vals) == 2 else ", or ".join(vals)
+                    if frame["type"] == "RNP":
+                        return f"whose {frame['phrase']} is {val_str}"
+                    return f"{frame['rel_clause_prefix']} {val_str}"
+
+            filler_str = self._verbalize_filler(filler, ctx)
 
             if frame["type"] == "RNP":
                 return f"whose {frame['phrase']} is {filler_str}"
