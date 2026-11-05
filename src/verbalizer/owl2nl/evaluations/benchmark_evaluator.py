@@ -113,7 +113,7 @@ def run_benchmark_evaluation():
     eval_dir = Path(__file__).resolve().parent
     results_dir = eval_dir.parent / "results"
 
-    saddg_json = results_dir / "koala_saddg_v2_results.json"
+    saddg_json = results_dir / "koala_engine2_results.json"
     baseline_json = results_dir / "koala_verbalizations.json"
 
     if not saddg_json.exists():
