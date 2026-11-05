@@ -1,0 +1,254 @@
+[
+  {
+    "id": 1,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Rainforest, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Forest)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Rainforest')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Forest')),annotations=[])",
+    "saddg_v2_output": "every rainforest is a forest"
+  },
+  {
+    "id": 2,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#DryEucalyptForest, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Forest)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'DryEucalyptForest')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Forest')),annotations=[])",
+    "saddg_v2_output": "every dry eucalypt forest is a forest"
+  },
+  {
+    "id": 3,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#TasmanianDevil, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Marsupials)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'TasmanianDevil')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Marsupials')),annotations=[])",
+    "saddg_v2_output": "every tasmanian devil is a marsupial"
+  },
+  {
+    "id": 4,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Person, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Animal)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Person')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Animal')),annotations=[])",
+    "saddg_v2_output": "every person is an animal"
+  },
+  {
+    "id": 5,
+    "axiom_type": "OWLDataHasValue",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Koala)",
+    "owl_expression": "OWLDataHasValue(property=OWLDataProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'isHardWorking')),value=OWLLiteral((False, OWLDatatype(IRI('http://www.w3.org/2001/XMLSchema#', 'boolean')))))",
+    "saddg_v2_output": "whose is not hard working"
+  },
+  {
+    "id": 6,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Parent, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Animal)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Parent')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Animal')),annotations=[])",
+    "saddg_v2_output": "every parent is an animal"
+  },
+  {
+    "id": 7,
+    "axiom_type": "OWLDataHasValue",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Quokka)",
+    "owl_expression": "OWLDataHasValue(property=OWLDataProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'isHardWorking')),value=OWLLiteral((True, OWLDatatype(IRI('http://www.w3.org/2001/XMLSchema#', 'boolean')))))",
+    "saddg_v2_output": "whose is hard working"
+  },
+  {
+    "id": 8,
+    "axiom_type": "OWLObjectExactCardinality",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Animal)",
+    "owl_expression": "OWLObjectExactCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasGender')),1,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing')))",
+    "saddg_v2_output": "has exactly one gender"
+  },
+  {
+    "id": 9,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#University, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Habitat)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'University')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Habitat')),annotations=[])",
+    "saddg_v2_output": "every university is a habitat"
+  },
+  {
+    "id": 10,
+    "axiom_type": "OWLObjectMinCardinality",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Animal)",
+    "owl_expression": "OWLObjectMinCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasHabitat')),1,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing')))",
+    "saddg_v2_output": "has at least one habitat"
+  },
+  {
+    "id": 11,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Quokka, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Marsupials)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Quokka')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Marsupials')),annotations=[])",
+    "saddg_v2_output": "every quokka is a marsupial"
+  },
+  {
+    "id": 12,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Forest, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Habitat)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Forest')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Habitat')),annotations=[])",
+    "saddg_v2_output": "every forest is a habitat"
+  },
+  {
+    "id": 13,
+    "axiom_type": "OWLObjectSomeValuesFrom",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Koala)",
+    "owl_expression": "OWLObjectSomeValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasHabitat')),filler=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'DryEucalyptForest')))",
+    "saddg_v2_output": "whose habitat is a dry eucalypt forest"
+  },
+  {
+    "id": 14,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#GraduateStudent, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Student)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'GraduateStudent')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Student')),annotations=[])",
+    "saddg_v2_output": "every graduate student is a student"
+  },
+  {
+    "id": 15,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Koala, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Marsupials)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Koala')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Marsupials')),annotations=[])",
+    "saddg_v2_output": "every koala is a marsupial"
+  },
+  {
+    "id": 16,
+    "axiom_type": "OWLObjectSomeValuesFrom",
+    "target_label": "SubClassRestriction(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#GraduateStudent)",
+    "owl_expression": "OWLObjectSomeValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasDegree')),filler=OWLObjectOneOf(frozenset({OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'BA')), OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'BS'))})))",
+    "saddg_v2_output": "whose degree is BA or BS"
+  },
+  {
+    "id": 17,
+    "axiom_type": "OWLSubClassOfAxiom",
+    "target_label": "SubClassOf(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Marsupials, http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Animal)",
+    "owl_expression": "OWLSubClassOfAxiom(sub_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Marsupials')),super_class=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Animal')),annotations=[])",
+    "saddg_v2_output": "every marsupial is an animal"
+  },
+  {
+    "id": 18,
+    "axiom_type": "OWLObjectIntersectionOf",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Parent)",
+    "owl_expression": "OWLObjectIntersectionOf((OWLObjectMinCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),1,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing'))), OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Animal'))))",
+    "saddg_v2_output": "animals that has at least one child"
+  },
+  {
+    "id": 19,
+    "axiom_type": "OWLObjectMinCardinality",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Parent)",
+    "owl_expression": "OWLObjectMinCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),1,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing')))",
+    "saddg_v2_output": "has at least one child"
+  },
+  {
+    "id": 20,
+    "axiom_type": "OWLObjectHasValue",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Male)",
+    "owl_expression": "OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasGender')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'male')))",
+    "saddg_v2_output": "whose gender is male"
+  },
+  {
+    "id": 21,
+    "axiom_type": "OWLObjectIntersectionOf",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#MaleStudentWith3Daughters)",
+    "owl_expression": "OWLObjectIntersectionOf((OWLObjectExactCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),3,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing'))), OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasGender')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'male'))), OWLObjectAllValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),filler=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Female'))), OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Student'))))",
+    "saddg_v2_output": "students who has exactly three children and whose gender is male and who only has femal as children"
+  },
+  {
+    "id": 22,
+    "axiom_type": "OWLObjectExactCardinality",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#MaleStudentWith3Daughters)",
+    "owl_expression": "OWLObjectExactCardinality(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),3,filler=OWLClass(IRI('http://www.w3.org/2002/07/owl#', 'Thing')))",
+    "saddg_v2_output": "has exactly three children"
+  },
+  {
+    "id": 23,
+    "axiom_type": "OWLObjectHasValue",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#MaleStudentWith3Daughters)",
+    "owl_expression": "OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasGender')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'male')))",
+    "saddg_v2_output": "whose gender is male"
+  },
+  {
+    "id": 24,
+    "axiom_type": "OWLObjectAllValuesFrom",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#MaleStudentWith3Daughters)",
+    "owl_expression": "OWLObjectAllValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasChildren')),filler=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Female')))",
+    "saddg_v2_output": "only has femal as children"
+  },
+  {
+    "id": 25,
+    "axiom_type": "OWLObjectHasValue",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Female)",
+    "owl_expression": "OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasGender')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'female')))",
+    "saddg_v2_output": "whose gender is female"
+  },
+  {
+    "id": 26,
+    "axiom_type": "OWLObjectIntersectionOf",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Student)",
+    "owl_expression": "OWLObjectIntersectionOf((OWLDataHasValue(property=OWLDataProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'isHardWorking')),value=OWLLiteral((True, OWLDatatype(IRI('http://www.w3.org/2001/XMLSchema#', 'boolean'))))), OWLObjectSomeValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasHabitat')),filler=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'University'))), OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Person'))))",
+    "saddg_v2_output": "people whose is hard working and whose habitat is an university"
+  },
+  {
+    "id": 27,
+    "axiom_type": "OWLDataHasValue",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Student)",
+    "owl_expression": "OWLDataHasValue(property=OWLDataProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'isHardWorking')),value=OWLLiteral((True, OWLDatatype(IRI('http://www.w3.org/2001/XMLSchema#', 'boolean')))))",
+    "saddg_v2_output": "whose is hard working"
+  },
+  {
+    "id": 28,
+    "axiom_type": "OWLObjectSomeValuesFrom",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Student)",
+    "owl_expression": "OWLObjectSomeValuesFrom(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasHabitat')),filler=OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'University')))",
+    "saddg_v2_output": "whose habitat is an university"
+  },
+  {
+    "id": 29,
+    "axiom_type": "OWLObjectIntersectionOf",
+    "target_label": "EquivalentClass(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#KoalaWithPhD)",
+    "owl_expression": "OWLObjectIntersectionOf((OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasDegree')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'PhD'))), OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Koala'))))",
+    "saddg_v2_output": "koalas whose degree is ph d"
+  },
+  {
+    "id": 30,
+    "axiom_type": "OWLObjectHasValue",
+    "target_label": "SubExpression(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#KoalaWithPhD)",
+    "owl_expression": "OWLObjectHasValue(property=OWLObjectProperty(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'hasDegree')), individual=OWLNamedIndividual(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'PhD')))",
+    "saddg_v2_output": "whose degree is ph d"
+  },
+  {
+    "id": 31,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#male)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Gender'))",
+    "saddg_v2_output": "genders"
+  },
+  {
+    "id": 32,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#MA)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Degree'))",
+    "saddg_v2_output": "degrees"
+  },
+  {
+    "id": 33,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#BS)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Degree'))",
+    "saddg_v2_output": "degrees"
+  },
+  {
+    "id": 34,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#PhD)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Degree'))",
+    "saddg_v2_output": "degrees"
+  },
+  {
+    "id": 35,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#BA)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Degree'))",
+    "saddg_v2_output": "degrees"
+  },
+  {
+    "id": 36,
+    "axiom_type": "OWLClass",
+    "target_label": "ClassAssertion(http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#female)",
+    "owl_expression": "OWLClass(IRI('http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#', 'Gender'))",
+    "saddg_v2_output": "genders"
+  }
+]

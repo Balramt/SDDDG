@@ -1,0 +1,20 @@
+{
+  "ld2nl_paper_baseline": {
+    "mean_adequacy": 4.4,
+    "mean_fluency": 4.38,
+    "max_adequacy_pct": 77.0,
+    "max_fluency_pct": 69.0
+  },
+  "saddg_v2_performance": {
+    "saddg_v2_adequacy": 4.83,
+    "saddg_v2_fluency": 5.0,
+    "saddg_v2_max_adequacy_pct": 83.3,
+    "saddg_v2_max_fluency_pct": 100.0
+  },
+  "lexical_similarity_metrics": {
+    "bleu_1": 0.0,
+    "bleu_4": 0.0,
+    "rouge_l": 100.0
+  },
+  "evaluated_expressions_count": 36
+}
