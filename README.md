@@ -97,5 +97,3 @@ python src/verbalizer/owl2nl/evaluations/benchmark_evaluator.py
 *(This calculates the Adequacy/Fluency heuristics and compares them to the LD2NL baseline).*
 
 ```
-
-```
