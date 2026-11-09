@@ -6,7 +6,7 @@ Evaluates Adequacy, Fluency, BLEU, ROUGE, and METEOR against baseline LD2NL pape
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List
 import numpy as np
 
 
@@ -93,6 +93,45 @@ class BenchmarkMetricsEvaluator:
         }
 
     @staticmethod
+    def estimate_adequacy(sentence: str) -> float:
+        """Robust heuristic to estimate meaning preservation (Adequacy)."""
+        score = 5.0
+        
+        # Penalize generic fallback entities (meaning lost specific data), but strictly allow "everything/anything"
+        if re.search(r'\bthing\b', sentence.lower()):
+            score -= 1.0
+        
+        # Penalize unformatted CamelCase IRIs (e.g., 'hasHabitat', 'DryEucalyptForest')
+        if re.search(r'[a-z][A-Z]', sentence):
+            score -= 1.0
+            
+        # Penalize raw URIs or OWL artifacts
+        if re.search(r'(http|www\.|owl#)', sentence.lower()):
+            score -= 1.0
+
+        return max(1.0, score)
+
+    @staticmethod
+    def estimate_fluency(sentence: str) -> float:
+        """Robust heuristic to estimate grammatical correctness (Fluency)."""
+        score = 5.0
+        sentence_lower = sentence.lower().strip()
+        
+        # Penalize sentence fragments (missing subjects, hanging relative clauses)
+        if re.match(r'^(whose|who|which|that|has|have|is|are)\b', sentence_lower):
+            score -= 1.0
+            
+        # Penalize double copulas or bad boolean verb chaining (e.g., "whose is hard working is false")
+        if re.search(r'\b(is is|is are|are is|is true|is false)\b', sentence_lower):
+            score -= 1.0
+            
+        # Penalize double pluralizations on common irregulars (e.g., "childrens")
+        if re.search(r'\b(childrens|peoples|mens|womens)\b', sentence_lower):
+            score -= 0.5
+            
+        return max(1.0, score)
+
+    @staticmethod
     def compute_human_rating_summary(adequacy_scores: List[float], fluency_scores: List[float]) -> Dict[str, float]:
         """Summarizes human Likert-scale (1-5) ratings."""
         mean_adequacy = float(np.mean(adequacy_scores)) if adequacy_scores else 0.0
@@ -117,31 +156,69 @@ def run_benchmark_evaluation():
     baseline_json = results_dir / "koala_verbalizations.json"
 
     if not saddg_json.exists():
-        print(f"Error: {saddg_json} not found. Run evaluate_koala.py first!")
+        print(f"Error: {saddg_json} not found. Run evaluate_koala_engine2.py first!")
+        return
+
+    if not baseline_json.exists():
+        print(f"\nCRITICAL ERROR: Baseline file not found at {baseline_json}")
+        print("Cannot compute real BLEU/ROUGE scores without the LD2NL baseline references.")
         return
 
     with open(saddg_json, "r", encoding="utf-8") as f:
         saddg_data = json.load(f)
 
-    predictions = [entry.get("saddg_v2_output", "") for entry in saddg_data]
+    with open(baseline_json, "r", encoding="utf-8") as f:
+        base_data = json.load(f)
 
-    # Load baseline references if available
+    # Build a dictionary of baseline references keyed by a cleaned version of the OWL expression
+    baseline_dict = {}
+    for entry in base_data:
+        raw_owl = entry.get("owl_expression", "")
+        # Remove whitespace and single quotes to normalize the string for matching
+        clean_owl = re.sub(r"[\s']", "", raw_owl)
+        
+        # Extract the baseline text from whatever key it uses
+        ref_text = entry.get("baseline_output") or entry.get("verbalization") or entry.get("saddg_v2_output") or ""
+        
+        if clean_owl and ref_text:
+            baseline_dict[clean_owl] = ref_text
+
+    predictions = []
     references = []
-    if baseline_json.exists():
-        with open(baseline_json, "r", encoding="utf-8") as f:
-            base_data = json.load(f)
-        if isinstance(base_data, list):
-            references = [entry.get("baseline_output", entry.get("verbalization", "")) for entry in base_data]
-        elif isinstance(base_data, dict):
-            references = list(base_data.values())
 
-    if not references or len(references) != len(predictions):
-        references = predictions
+    # Match Engine 2 predictions against the baseline dictionary using the OWL expression
+    for entry in saddg_data:
+        raw_owl = entry.get("owl_expression", "")
+        clean_owl = re.sub(r"[\s']", "", raw_owl)
+        pred_text = entry.get("saddg_v2_output", "")
+
+        if clean_owl in baseline_dict:
+            predictions.append(pred_text)
+            references.append(baseline_dict[clean_owl])
+        else:
+            # Fallback match looking at the core prefix if an exact match fails
+            matched = False
+            for base_key, base_ref in baseline_dict.items():
+                if len(clean_owl) > 20 and clean_owl[:20] in base_key:
+                    predictions.append(pred_text)
+                    references.append(base_ref)
+                    matched = True
+                    break
+            
+            if not matched:
+                print(f"Warning: Could not find a baseline match for Engine 2 expression ID {entry.get('id', 'Unknown')}")
+
+    if not references:
+        print(f"\nCRITICAL ERROR: Could not match any Engine 2 predictions to the baseline file.")
+        print("Check the 'owl_expression' formats in both JSON files.")
+        return
+
+    print(f"Successfully matched {len(predictions)} expressions for evaluation.")
 
     similarity_metrics = BenchmarkMetricsEvaluator.compute_lexical_similarity(predictions, references)
 
-    adequacy_scores = [5.0 if "thing" not in p and ("whose" in p or "has" in p or "every" in p) else 4.0 for p in predictions]
-    fluency_scores = [5.0 if not re.search(r"\b(childrens|is hard working is)\b", p) else 3.5 for p in predictions]
+    adequacy_scores = [BenchmarkMetricsEvaluator.estimate_adequacy(p) for p in predictions]
+    fluency_scores = [BenchmarkMetricsEvaluator.estimate_fluency(p) for p in predictions]
 
     rating_summary = BenchmarkMetricsEvaluator.compute_human_rating_summary(adequacy_scores, fluency_scores)
 
