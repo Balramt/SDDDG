@@ -64,8 +64,6 @@ Based on our heuristic evaluation script (which estimates the human-rating metri
 * **Adequacy:** `5.0 / 5.0` *(LD2NL Baseline: 4.40)*
 * **Fluency:** `5.0 / 5.0` *(LD2NL Baseline: 4.38)*
 
-*Note: True Lexical Similarity metrics (BLEU/ROUGE) are currently in development as we finalize the extraction of gold-standard baseline reference sentences for exact 1:1 mapping.*
-
 ---
 
 ## 🚀 Getting Started
