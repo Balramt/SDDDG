@@ -1,4 +1,3 @@
-```markdown
 # SADDG: Syntax-Aware Dynamic Dependency Graph for OWL2NL
 
 Welcome to the **SADDG** (Syntax-Aware Dynamic Dependency Graph) framework. This project is an advanced Natural Language Generation (NLG) engine designed to verbalize formal Description Logic (OWL) axioms into fluent, grammatically correct English. 
